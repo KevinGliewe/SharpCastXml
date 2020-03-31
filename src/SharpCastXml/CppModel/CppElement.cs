@@ -25,7 +25,9 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using System.Xml.Serialization;
+using SharpCastXml.Parser;
 
 namespace SharpCastXml.CppModel
 {
@@ -51,18 +53,22 @@ namespace SharpCastXml.CppModel
         public string Id { get; set; }
 
         /// <summary>
-        /// Gets or sets the description.
+        /// Gets or sets the __attribute__.
         /// </summary>
-        /// <value>The description.</value>
-        [XmlElement("description")]
-        public string Description { get; set; }
+        /// <value>
+        /// The __attribute__.
+        /// </value>
+        [XmlElement("attributes")]
+        public string[] Attributes { get; set; }
 
         /// <summary>
-        /// Gets or sets the remarks.
+        /// Gets or sets the Annotation.
         /// </summary>
-        /// <value>The remarks.</value>
-        [XmlElement("remarks")]
-        public string Remarks { get; set; }
+        /// <value>
+        /// The Annotation.
+        /// </value>
+        [XmlElement("annotation")]
+        public Newtonsoft.Json.Linq.JObject Annotation { get; set; }
 
         /// <summary>
         /// Gets or sets the parent.
@@ -133,8 +139,8 @@ namespace SharpCastXml.CppModel
         [XmlArrayItem(typeof (CppMethod))]
         [XmlArrayItem(typeof (CppParameter))]
         [XmlArrayItem(typeof (CppStruct))]
-        [XmlArrayItem(typeof(CppReturnValue))]
-        [XmlArrayItem(typeof(CppMarshallable))]
+        [XmlArrayItem(typeof (CppReturnValue))]
+        [XmlArrayItem(typeof (CppMarshallable))]
         public List<CppElement> Items { get; set; }
 
         protected internal virtual IEnumerable<CppElement> AllItems
@@ -195,6 +201,57 @@ namespace SharpCastXml.CppModel
                 innerElement.Parent = this;
                 innerElement.ResetParents();
             }
+        }
+
+        public void SetAttributes(XElement xElement)
+        {
+            // Check that the xml contains the "attributes" attribute
+            var attributes = xElement.AttributeValue("attributes");
+            Annotation = null;
+            if (string.IsNullOrWhiteSpace(attributes))
+            {
+                Attributes = new string[] { };
+                return;
+            }
+
+            if (SetAnnotation(attributes))
+            {
+                Attributes = new string[] {attributes};
+                return;
+            }
+
+            Attributes = attributes.Split(' ').Reverse().ToArray();
+            
+            
+
+            foreach (var attr in Attributes)
+            {
+                if (SetAnnotation(attr))
+                    break;
+            }
+            
+        }
+
+        public bool SetAnnotation(string annotation)
+        {
+            const string ANNOTATE = "annotate(";
+
+            if (!annotation.StartsWith(ANNOTATE))
+                return false;
+
+            var data = annotation.Substring(ANNOTATE.Length, annotation.Length - ANNOTATE.Length - 1);
+            try
+            {
+                var json = Hjson.HjsonValue.Parse(data).ToString();
+                Annotation = Newtonsoft.Json.Linq.JObject.Parse(json);
+            }
+            catch (Exception ex)
+            {
+                //Annotation = Newtonsoft.Json.Linq.JValue.CreateString(data);
+                return false;
+            }
+
+            return true;
         }
 
         [ExcludeFromCodeCoverage]

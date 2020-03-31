@@ -301,6 +301,8 @@ namespace SharpCastXml.Parser
             if (string.IsNullOrWhiteSpace(attributes))
                 return;
 
+            cppElement.SetAttributes(xElement);
+
             // Strip whitespaces inside annotate("...")
             var stripSpaces = new StringBuilder();
             var doubleQuoteCount = 0;
@@ -442,9 +444,6 @@ namespace SharpCastXml.Parser
 
             Logger.PushContext("Callable:[{0}]", cppCallable.Name);
 
-            // Parse annotations
-            ParseAnnotations(xElement, cppCallable);
-
             // Parse parameters
             ParseParameters(xElement, cppCallable);
 
@@ -497,9 +496,6 @@ namespace SharpCastXml.Parser
 
                 offsetMethod += cppInterfaceBase.TotalMethodCount;
             }
-
-            // Parse annotations
-            ParseAnnotations(xElement, cppInterface);
 
             int offsetMethodBase = offsetMethod;
 
@@ -589,6 +585,8 @@ namespace SharpCastXml.Parser
             };
 
             Logger.PushContext("Field:[{0}]", cppField.Name);
+
+            cppField.SetAttributes(xElement);
 
             // Handle bitfield info
             var bitField = xElement.AttributeValue("bits");
@@ -763,6 +761,7 @@ namespace SharpCastXml.Parser
 
             cppEnum = new CppEnum { Name = xElement.AttributeValue("name") };
 
+
             // Doh! Anonymous Enum, need to handle them!
             if (cppEnum.Name.StartsWith("$") || string.IsNullOrEmpty(cppEnum.Name))
             {
@@ -823,7 +822,9 @@ namespace SharpCastXml.Parser
             // Handle C++ floating point literals
             value = value.Replace(".F", ".0F");
 
-            return new CppConstant { Name = name, Value = value };
+            var cppConstant = new CppConstant { Name = name, Value = value };
+
+            return cppConstant;
         }
 
         /// <summary>
@@ -914,6 +915,9 @@ namespace SharpCastXml.Parser
                     continue;
 
                 var cppElement = ParseElement(xElement);
+
+                // Parse annotations
+                ParseAnnotations(xElement, cppElement);
 
                 if (cppElement != null)
                     _currentCppInclude.Add(cppElement);
