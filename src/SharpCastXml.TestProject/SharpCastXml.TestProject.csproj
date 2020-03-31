@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SharpCastXML\SharpCastXML.csproj" />
+    <ProjectReference Include="..\SharpCastXml\SharpCastXml.csproj" />
   </ItemGroup>
 
   <ItemGroup>
