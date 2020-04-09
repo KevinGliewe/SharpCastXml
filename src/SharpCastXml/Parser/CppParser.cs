@@ -110,7 +110,7 @@ namespace SharpCastXml.Parser
         /// Runs this instance.
         /// </summary>
         /// <returns></returns>
-        public CppModule Run(CppModule groupSkeleton)
+        public CppModule Run(CppModule groupSkeleton, string additionalArguments = "")
         {
             _group = groupSkeleton;
             Logger.Message("Config files changed.");
@@ -125,7 +125,14 @@ namespace SharpCastXml.Parser
 
                 var configRootHeader = _config.Id; // Path.Combine(OutputPath, Path.GetFileNameWithoutExtension(_config.Id));
 
-                xmlReader = _gccxml.Process(configRootHeader, OutputPath);
+                additionalArguments +=
+                    " " + String.Join(" ", _config.Include.Select(i => 
+                        $"-include \"{i}\"")) +
+                    " " + String.Join(" ", _config.Macros.Select(m => 
+                        $"-D{m.Key}" + (m.Value is null ? "" : $"=\"{m.Value}\"")));
+
+
+                xmlReader = _gccxml.Process(configRootHeader, OutputPath, additionalArguments);
                 if (xmlReader != null)
                 {
                     Parse(xmlReader);
@@ -875,7 +882,7 @@ namespace SharpCastXml.Parser
                 var includeId = GetIncludeIdFromFileId(includeGccXmlId);
 
                 // Process only files listed inside the config files
-                if (!_config.Includes.Contains(includeId))
+                if (!_config.Process.Contains(includeId))
                     continue;
 
                 // Log current include being processed
@@ -960,7 +967,7 @@ namespace SharpCastXml.Parser
         {
             var fileId = type.AttributeValue("file");
             if (fileId != null)
-                return _config.Includes.Contains(GetIncludeIdFromFileId(fileId));
+                return _config.Process.Contains(GetIncludeIdFromFileId(fileId));
             return false;
         }
 

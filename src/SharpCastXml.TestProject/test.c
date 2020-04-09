@@ -1,7 +1,5 @@
 
-#include "test.h"
-
-#define ARRSIZE 666
+//#include "test.h"
 
 struct ANNOTATE("test:true,other:yes")
 	STest

@@ -24,10 +24,17 @@ namespace SharpCastXml.TestProject {
 
             var config = new ContextConfig() {
                 Id = Path.GetFullPath("test.c"),
-                Includes = new string[] {
+                Process = new string[] {
                     Path.GetFullPath("test.c"),
 //                    Path.GetFullPath("test.h"),
-                }.ToList()
+                }.ToList(),
+                Include = new string[] {
+                    Path.GetFullPath("test.h"),
+                }.ToList(),
+                Macros = new Dictionary<string, string>()
+                {
+                    {"ARRSIZE", "42 * 3"}
+                }
             };
 
 

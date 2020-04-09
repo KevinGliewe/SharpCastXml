@@ -160,7 +160,7 @@ namespace SharpCastXml.Parser
         /// </summary>
         /// <param name="headerFile">The header headerFile.</param>
         /// <returns></returns>
-        public StreamReader Process(string headerFile, string outputPath = null)
+        public StreamReader Process(string headerFile, string outputPath = null, string additionalArguments = "")
         {
             StreamReader result = null;
 
@@ -177,7 +177,7 @@ namespace SharpCastXml.Parser
                 // Delete any previously generated xml file
                 File.Delete(xmlFile);
 
-                RunCastXml(headerFile, LogCastXmlOutput, $"-o {xmlFile}");
+                RunCastXml(headerFile, LogCastXmlOutput, $"-o {xmlFile} " + additionalArguments);
 
                 if (!File.Exists(xmlFile) || Logger.HasErrors)
                 {
