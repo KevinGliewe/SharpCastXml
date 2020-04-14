@@ -16,8 +16,8 @@ namespace SharpCastXml.TestProject {
             var logger = new Logger(consoleLogger, consoleLogger);
 
             string executablePath = null;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                executablePath = Path.GetFullPath("../../../../../bin/CastXML/bin/castxml.exe");
+//            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+//                executablePath = Path.GetFullPath("../../../../../bin/CastXML/bin/castxml.exe");
 
             var castXml = new CastXml(logger, new IncludeDirectoryResolver(logger), executablePath);
             var cppParser = new CppParser(logger, castXml);

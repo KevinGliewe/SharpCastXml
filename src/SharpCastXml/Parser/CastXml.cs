@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
@@ -291,30 +292,61 @@ namespace SharpCastXml.Parser
                 Logger.Message(e.Data);
         }
 
-        private string ResolveExecutablePath() {
-            var separator = (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) ? ';' : ':';
-            
-            foreach(var searchPath in Environment.GetEnvironmentVariable("path").Split(separator)) {
-                if (!Directory.Exists(searchPath))
-                    continue;
-
-                foreach(var file in Directory.GetFiles(searchPath)) {
-                    if (!(Path.GetFileNameWithoutExtension(file).ToLower() == "castxml"))
+        private string ResolveExecutablePath()
+        {
+            void CheckInDirectory(string dir)
+            {
+                if (!Directory.Exists(dir))
+                    return;
+                foreach (var file in Directory.GetFiles(dir)) {
+                    if (Path.GetFileNameWithoutExtension(file).ToLower() != "castxml")
                         continue;
 
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
                         if (Path.GetExtension(file).ToLower() == ".exe")
-                            return Path.GetFullPath(file);
+                            throw new CastXMLFound(Path.GetFullPath(file));
                     } else {
                         var unixFileInfo = new Mono.Unix.UnixFileInfo(file);
                         var executeFlags = unixFileInfo.FileAccessPermissions & (Mono.Unix.FileAccessPermissions.GroupExecute | Mono.Unix.FileAccessPermissions.UserExecute | Mono.Unix.FileAccessPermissions.OtherExecute);
                         if ((int)(executeFlags) != 0)
-                            return Path.GetFullPath(file);
+                            throw new CastXMLFound(Path.GetFullPath(file));
                     }
                 }
             }
 
+
+            try
+            {
+
+                CheckInDirectory(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "castxml", "bin"));
+
+                var separator = (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) ? ';' : ':';
+                foreach (var searchPath in Environment.GetEnvironmentVariable("path").Split(separator))
+                {
+                    if (!Directory.Exists(searchPath))
+                        continue;
+                    CheckInDirectory(searchPath);
+
+                }
+            }
+            catch (CastXMLFound found)
+            {
+                return found.CastXMLPath;
+            }
+
             throw new Exception("castxml not found in path");
+        }
+
+        public string ExecutableFileExtension => (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) ? ".exe" : "";
+
+        private class CastXMLFound : Exception
+        {
+            public String CastXMLPath { get; private set; }
+
+            public CastXMLFound(string castXmlPath)
+            {
+                CastXMLPath = castXmlPath;
+            }
         }
     }
 }
