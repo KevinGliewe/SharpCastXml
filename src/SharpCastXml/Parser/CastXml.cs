@@ -306,9 +306,9 @@ namespace SharpCastXml.Parser
                         if (Path.GetExtension(file).ToLower() == ".exe")
                             throw new CastXMLFound(Path.GetFullPath(file));
                     } else {
-                        var unixFileInfo = new Mono.Unix.UnixFileInfo(file);
-                        var executeFlags = unixFileInfo.FileAccessPermissions & (Mono.Unix.FileAccessPermissions.GroupExecute | Mono.Unix.FileAccessPermissions.UserExecute | Mono.Unix.FileAccessPermissions.OtherExecute);
-                        if ((int)(executeFlags) != 0)
+                        //var unixFileInfo = new Mono.Unix.UnixFileInfo(file);
+                        //var executeFlags = unixFileInfo.FileAccessPermissions & (Mono.Unix.FileAccessPermissions.GroupExecute | Mono.Unix.FileAccessPermissions.UserExecute | Mono.Unix.FileAccessPermissions.OtherExecute);
+                        //if ((int)(executeFlags) != 0)
                             throw new CastXMLFound(Path.GetFullPath(file));
                     }
                 }
