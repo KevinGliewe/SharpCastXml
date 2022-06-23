@@ -3,11 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.0.0</Version>
     <PackageProjectUrl>https://github.com/KevinGliewe/SharpCastXml</PackageProjectUrl>
-    <Description>C# Wrapper for CastXML. Based on https://github.com/SharpGenTools/SharpGenTools
-</Description>
-    <RepositoryUrl>https://github.com/KevinGliewe/SharpCastXml</RepositoryUrl>
+    <Description>C# Wrapper for CastXML. Based on https://github.com/SharpGenTools/SharpGenTools</Description>
   </PropertyGroup>
 
   <ItemGroup>

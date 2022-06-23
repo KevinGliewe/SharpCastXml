@@ -1,0 +1,28 @@
+<Project>
+
+  <Import Project="..\Version.props" />
+
+  <PropertyGroup>
+    <Company>Gliewe.NET</Company>
+    <Copyright>Copyright (C) Kevin Gliewe</Copyright>
+    <LangVersion>latest</LangVersion>
+    <Authors>$(Company)</Authors>
+    <Description>Code generation</Description>
+    <PackageTags>CastXml</PackageTags>
+    <PackageProjectUrl>https://github.com/KevinGliewe/SharpCastXml</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/KevinGliewe/SharpCastXml</RepositoryUrl>
+    <PackageReleaseNotes>https://github.com/KevinGliewe/SharpCastXml/blob/master/Changelog.md</PackageReleaseNotes>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../../doc/icon.png" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+</Project>

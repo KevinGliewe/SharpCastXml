@@ -1,0 +1,69 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  bump:
+    name: Bump tag version
+    runs-on: ubuntu-latest
+    outputs:
+      newtag: ${{ steps.bump_version.outputs.new_tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Bump version and push tag/create release point
+        uses: anothrNick/github-tag-action@1.39.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: false
+        id: bump_version
+
+  build:
+    name: Build, Pack and Deploy
+    runs-on: windows-latest
+    needs: bump
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7.9'
+
+      - name: Update Version
+        run: python scripts/update_version.py "${{ needs.bump.outputs.newtag }}"
+
+      - name: Install .NET (v6.0)
+        uses: actions/setup-dotnet@v1.7.2
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Pack
+        run: |
+          dotnet nuget locals all --clear
+          dotnet build --configuration Release
+          dotnet pack --configuration Release --output pack
+
+      - name: Deploy GitHub-Nuget
+        run: |
+          dotnet nuget push pack\*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+
+      - name: Deploy Nuget
+        run: |
+          dotnet nuget push pack\*.nupkg --api-key ${{ secrets.NUGET_TOKEN }} --source nuget.org
+
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: pack\*.nupkg
+          tag: ${{ needs.bump.outputs.newtag }}
+          overwrite: true
+          file_glob: true
