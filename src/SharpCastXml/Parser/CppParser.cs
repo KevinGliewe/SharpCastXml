@@ -173,6 +173,16 @@ namespace SharpCastXml.Parser
         
         public Dictionary<string, int> IncludeMacroCounts { get; } = new Dictionary<string, int>();
 
+        /// <summary>
+        /// Parses the xml file specified by StreamReader.
+        /// </summary>
+        /// <param name="reader">StreamReader for xml file</param>
+        /// <param name="groupSkeleton">CppModule</param>
+        public void Parse(StreamReader reader, CppModule groupSkeleton)
+        {
+            _group = groupSkeleton;
+            Parse(reader);
+        }
 
         /// <summary>
         /// Parses the specified reader.
