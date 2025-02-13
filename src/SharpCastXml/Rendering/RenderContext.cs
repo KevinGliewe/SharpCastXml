@@ -49,7 +49,7 @@ namespace SharpCastXml.Rendering
             var viewName = typeof(TView).Name;
 
             // Check for a ModelTypeNameAttribute
-            var modelTypeNameAttribute = typeof(TAnnotation).GetCustomAttribute<ViewNameAttribute>();
+            var modelTypeNameAttribute = typeof(TView).GetCustomAttribute<ViewNameAttribute>();
             if (modelTypeNameAttribute != null)
             {
                 viewName = modelTypeNameAttribute.Name;
