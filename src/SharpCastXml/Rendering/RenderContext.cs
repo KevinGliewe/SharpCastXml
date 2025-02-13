@@ -70,15 +70,14 @@ namespace SharpCastXml.Rendering
 
             return _viewRegistrations.FindAll(registration =>
             {
-                if (registration.ViewName == viewName)
-                {
-                    return true;
-                }
+                if(registration.ModelType != modelType)
+                    return false;
 
-                if (registration.ModelType == modelType)
-                {
+                if (registration.ViewName == null)
                     return true;
-                }
+
+                if (registration.ViewName == viewName)
+                    return true;
 
                 return false;
             });

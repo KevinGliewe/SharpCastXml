@@ -4,7 +4,7 @@
 namespace TestNs1::TestNs2 {
     namespace TestNs3 {
 
-        struct ANNOTATE("view:'Test',hello:'world'")
+        struct ANNOTATE("view:'TestView',hello:'world'")
             STest2
         {
             ANNOTATE("an_anotation")
@@ -15,5 +15,6 @@ namespace TestNs1::TestNs2 {
 
             struct STest3 { int a; };
         };
+
     }
 }
