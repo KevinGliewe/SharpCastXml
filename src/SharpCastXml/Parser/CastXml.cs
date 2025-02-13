@@ -115,6 +115,11 @@ namespace SharpCastXml.Parser
         public const string TagFunctionType = "FunctionType";
 
         /// <summary>
+        /// GccXml tag for Base
+        /// </summary>
+        public const string TagBase = "Base";
+
+        /// <summary>
         /// Gets or sets the executable path of castxml.
         /// </summary>
         /// <value>The executable path.</value>

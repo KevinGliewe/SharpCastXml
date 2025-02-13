@@ -29,6 +29,10 @@ namespace SharpCastXml.CppModel
     [XmlType("struct")]
     public class CppStruct : CppDatatype, IContextTrait
     {
+
+        [XmlAttribute("bases")]
+        public CppBase[] Bases { get; set; }
+
         /// <summary>
         /// Gets or sets the name of the parent.
         /// </summary>

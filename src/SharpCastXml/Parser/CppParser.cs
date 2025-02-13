@@ -682,6 +682,18 @@ namespace SharpCastXml.Parser
 
             cppStruct.Base = GetStructDirectBase(bases);
 
+
+            List<CppBase> baseElems = new List<CppBase>();
+            foreach (var xElementBase in xElement.Elements())
+            {
+                if(xElementBase.Name.LocalName != CastXml.TagBase)
+                    continue;
+
+                baseElems.Add(ParseBase(xElementBase));
+
+            }
+            cppStruct.Bases = baseElems.ToArray();
+
             // Parse all fields
             var fieldOffset = 0;
             var innerStructCount = 0;
@@ -1020,6 +1032,28 @@ namespace SharpCastXml.Parser
             }
 
             return cppNamespace;
+        }
+
+        private CppBase ParseBase(XElement xElement)
+        {
+
+            CppBase cppBase = new CppBase {};
+
+            var _type = xElement.AttributeValue("type");
+
+            var cppElement = ParseElement(_mapIdToXElement[_type]);
+
+            cppBase.BaseType = cppElement as CppStruct ?? throw new InvalidCastException(_type);
+
+            var offset = xElement.AttributeInt("offset");
+
+            cppBase.Offset = offset;
+
+            string access = xElement.AttributeValue("access");
+
+            cppBase.Access = CppAccessExtensions.FromString(access);
+
+            return cppBase;
         }
 
         private void ParseContext(IContextTrait elem, XElement xElement)
