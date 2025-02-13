@@ -17,6 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+using SharpCastXml.CppModel.Traits;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
@@ -26,7 +27,7 @@ namespace SharpCastXml.CppModel
     /// A C++ interface.
     /// </summary>
     [XmlType("interface")]
-    public class CppInterface : CppElement
+    public class CppInterface : CppElement, IContextTrait
     {
         /// <summary>
         /// Gets or sets the GUID.
@@ -58,5 +59,14 @@ namespace SharpCastXml.CppModel
         /// <value>The total method count.</value>
         [XmlIgnore]
         public int TotalMethodCount { get; set; }
+
+        /// <summary>
+        /// Gets or sets the context.
+        /// </summary>
+        /// <value>
+        /// The Context.
+        /// </value>
+        [XmlElement("context")]
+        public CppElement Context { get; set; }
     }
 }

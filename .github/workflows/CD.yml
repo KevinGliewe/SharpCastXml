@@ -40,10 +40,10 @@ jobs:
       - name: Update Version
         run: python scripts/update_version.py "${{ needs.bump.outputs.newtag }}"
 
-      - name: Install .NET (v6.0)
+      - name: Install .NET (v8.0)
         uses: actions/setup-dotnet@v1.7.2
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: 8.0.x
 
       - name: Pack
         run: |

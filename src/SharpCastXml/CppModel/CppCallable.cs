@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpCastXml.CppModel.Traits;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -8,7 +9,7 @@ using System.Xml.Serialization;
 namespace SharpCastXml.CppModel
 {
     [XmlType("callable")]
-    public class CppCallable : CppElement
+    public class CppCallable : CppElement, IContextTrait
     {
         protected virtual CppCallingConvention DefaultCallingConvention => CppCallingConvention.CDecl;
 
@@ -58,6 +59,15 @@ namespace SharpCastXml.CppModel
                 return allElements;
             }
         }
+
+        /// <summary>
+        /// Gets or sets the context.
+        /// </summary>
+        /// <value>
+        /// The Context.
+        /// </value>
+        [XmlElement("context")]
+        public CppElement Context { get; set; }
 
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents this instance.

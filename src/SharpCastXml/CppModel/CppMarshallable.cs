@@ -17,6 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+using SharpCastXml.CppModel.Traits;
 using System.Text;
 using System.Xml.Serialization;
 
@@ -25,7 +26,7 @@ namespace SharpCastXml.CppModel
     /// <summary>
     /// Type declaration.
     /// </summary>
-    public class CppMarshallable : CppElement
+    public class CppMarshallable : CppElement, IContextTrait
     {
         /// <summary>
         /// Gets or sets the name of the type.
@@ -82,6 +83,15 @@ namespace SharpCastXml.CppModel
         /// <value>The raw align size in bits</value>
         [XmlAttribute("align")]
         public int Align { get; set; } = 0;
+
+        /// <summary>
+        /// Gets or sets the context.
+        /// </summary>
+        /// <value>
+        /// The Context.
+        /// </value>
+        [XmlElement("context")]
+        public CppElement Context { get; set; }
 
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents this instance.

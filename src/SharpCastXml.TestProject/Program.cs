@@ -1,13 +1,18 @@
-﻿using Newtonsoft.Json;
+﻿using Autofac;
+using Newtonsoft.Json;
 using SharpCastXml.Config;
+using SharpCastXml.CppModel;
 using SharpCastXml.Logging;
 using SharpCastXml.Logging.Impl;
 using SharpCastXml.Parser;
+using SharpCastXml.Rendering;
 using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace SharpCastXml.TestProject {
     class Program {
@@ -51,6 +56,23 @@ namespace SharpCastXml.TestProject {
                     }
                 }
             }
+
+            Autofac.ContainerBuilder builder = new Autofac.ContainerBuilder();
+            builder.RegisterType<TestView>();
+            var container = builder.Build();
+
+            var renderingContext = new RenderingContext(container);
+            renderingContext.RegisterView<TestView, CppModel.CppStruct, TestAnnotation>();
+
+            StringBuilder stringBuilder = new StringBuilder();
+            TextWriter textWriter = new StringWriter(stringBuilder);
+            IndentedTextWriter indentedTextWriter = new IndentedTextWriter(textWriter);
+
+            CppStruct str = module.Includes.First().Structs.First();
+
+            renderingContext.Render(str, indentedTextWriter);
+
+            Console.WriteLine(stringBuilder.ToString());
 
             Console.WriteLine(JsonConvert.SerializeObject(module, Formatting.Indented, new JsonSerializerSettings {
                 PreserveReferencesHandling = PreserveReferencesHandling.Objects,

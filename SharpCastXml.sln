@@ -1,15 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.1062
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35222.181
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpCastXml", "src\SharpCastXml\SharpCastXml.csproj", "{E33532FF-81F3-41D0-ACDE-AC0BA694A780}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpCastXml.TestProject", "src\SharpCastXml.TestProject\SharpCastXml.TestProject.csproj", "{AB37ED20-59A0-4495-971B-B73DBDDF48EB}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{EF8015F0-25FF-4557-8969-1EC75CE169C6}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{4F62AACD-16D4-4314-BF3F-E0CE3C4F06E2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,14 +21,9 @@ Global
 		{AB37ED20-59A0-4495-971B-B73DBDDF48EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB37ED20-59A0-4495-971B-B73DBDDF48EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AB37ED20-59A0-4495-971B-B73DBDDF48EB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EF8015F0-25FF-4557-8969-1EC75CE169C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EF8015F0-25FF-4557-8969-1EC75CE169C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{EF8015F0-25FF-4557-8969-1EC75CE169C6} = {4F62AACD-16D4-4314-BF3F-E0CE3C4F06E2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {36308404-C831-4FC9-8C8A-5316BD6DBF66}

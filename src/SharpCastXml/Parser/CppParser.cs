@@ -28,6 +28,7 @@ using System.Xml.Linq;
 using SharpCastXml.Logging;
 using SharpCastXml.Config;
 using SharpCastXml.CppModel;
+using SharpCastXml.CppModel.Traits;
 
 namespace SharpCastXml.Parser
 {
@@ -43,7 +44,8 @@ namespace SharpCastXml.Parser
 
         public static string Id(this XElement xElement) => xElement.AttributeValue("id");
 
-        public static int AttributeInt(this XElement xElement, string name, int def = 0) {
+        public static int AttributeInt(this XElement xElement, string name, int def = 0)
+        {
             var data = xElement.AttributeValue(name);
             if (data is null)
                 return def;
@@ -57,7 +59,7 @@ namespace SharpCastXml.Parser
     /// </summary>
     public class CppParser
     {
-        private CppModule _group;
+        private CppModule _group = new CppModule();
         private readonly Dictionary<string, bool> _includeIsAttached = new Dictionary<string, bool>();
         private readonly Dictionary<string, HashSet<string>> _includeAttachedTypes = new Dictionary<string, HashSet<string>>();
         private readonly CastXml _gccxml;
@@ -78,10 +80,17 @@ namespace SharpCastXml.Parser
             _gccxml = castXml;
         }
 
+        public CppParser(Logger logger)
+        {
+            Logger = logger;
+        }
+
         public string OutputPath { get; set; }
 
         public Logger Logger { get; }
-        
+
+        public CppModule Group => _group;
+
         public void Initialize(ContextConfig configRoot)
         {
             _config = configRoot ?? throw new ArgumentNullException(nameof(configRoot));
@@ -89,7 +98,20 @@ namespace SharpCastXml.Parser
             OutputPath = Path.Combine(Path.GetTempPath(), "castxml-" + _config.Id.GetHashCode());
             if (!Directory.Exists(OutputPath))
                 Directory.CreateDirectory(OutputPath);
-        }   
+        }
+
+        public CppModule ParseXml(StreamReader reader)
+        {
+            Parse(reader);
+            return _group;
+        }
+
+        public CppModule ParseXml(string xmlFile)
+        {
+            var stream = File.OpenRead(xmlFile);
+            Parse(new StreamReader(stream));
+            return _group;
+        }
 
         /// <summary>
         /// Gets the name of the generated GCCXML file.
@@ -116,7 +138,7 @@ namespace SharpCastXml.Parser
             Logger.Message("Config files changed.");
 
             const string progressMessage = "Parsing C++ headers starts, please wait...";
-                
+
             StreamReader xmlReader = null;
             try
             {
@@ -126,9 +148,9 @@ namespace SharpCastXml.Parser
                 var configRootHeader = _config.Id; // Path.Combine(OutputPath, Path.GetFileNameWithoutExtension(_config.Id));
 
                 additionalArguments +=
-                    " " + String.Join(" ", _config.Include.Select(i => 
+                    " " + String.Join(" ", _config.Include.Select(i =>
                         $"-include \"{i}\"")) +
-                    " " + String.Join(" ", _config.Macros.Select(m => 
+                    " " + String.Join(" ", _config.Macros.Select(m =>
                         $"-D{m.Key}" + (m.Value is null ? "" : $"=\"{m.Value}\"")));
 
 
@@ -163,14 +185,14 @@ namespace SharpCastXml.Parser
                 IncludeMacroCounts.TryGetValue(cppInclude.Name, out int count);
                 foreach (var cppDefine in cppInclude.Macros)
                 {
-                    count ++;
+                    count++;
                 }
                 IncludeMacroCounts[cppInclude.Name] = count;
             }
 
             return _group;
         }
-        
+
         public Dictionary<string, int> IncludeMacroCounts { get; } = new Dictionary<string, int>();
 
 
@@ -178,7 +200,7 @@ namespace SharpCastXml.Parser
         /// Parses the specified reader.
         /// </summary>
         /// <param name="reader">The reader.</param>
-        private void Parse(StreamReader reader)
+        public void Parse(StreamReader reader)
         {
             var doc = XDocument.Load(reader);
 
@@ -220,14 +242,16 @@ namespace SharpCastXml.Parser
             ParseAllElements();
         }
 
-        private T GetExisting<T>(XElement xElement) where T : CppElement {
+        private T GetExisting<T>(XElement xElement) where T : CppElement
+        {
             var id = xElement.Id();
-            if(!_cppElements.ContainsKey(id))
+            if (!_cppElements.ContainsKey(id))
                 return null;
             return (T)_cppElements[id];
         }
 
-        private void AddExisting<T>(T cppElement, XElement xElement) where T : CppElement {
+        private void AddExisting<T>(T cppElement, XElement xElement) where T : CppElement
+        {
             _cppElements.Add(xElement.Id(), cppElement);
         }
 
@@ -449,6 +473,8 @@ namespace SharpCastXml.Parser
             cppCallable = new T { Name = xElement.AttributeValue("name") };
             AddExisting<T>(cppCallable, xElement);
 
+            ParseContext(cppCallable, xElement);
+
             Logger.PushContext("Callable:[{0}]", cppCallable.Name);
 
             // Parse parameters
@@ -478,6 +504,9 @@ namespace SharpCastXml.Parser
             cppInterface = new CppInterface { Name = xElement.AttributeValue("name") };
             AddExisting(cppInterface, xElement);
             xElement.AddAnnotation(cppInterface);
+
+            ParseContext(cppInterface, xElement);
+            ParseNested(cppInterface, xElement);
 
             // Enter Interface description
             Logger.PushContext("Interface:[{0}]", cppInterface.Name);
@@ -642,6 +671,9 @@ namespace SharpCastXml.Parser
             // Get size from structure
             cppStruct.Size = xElement.AttributeInt("size");
 
+            ParseContext(cppStruct, xElement);
+            ParseNested(cppStruct, xElement);
+
             // Enter struct/union description
             Logger.PushContext("{0}:[{1}]", xElement.Name.LocalName, cppStruct.Name);
 
@@ -667,7 +699,7 @@ namespace SharpCastXml.Parser
                 if (fieldType.AttributeValue("context") == xElement.AttributeValue("id"))
                 {
                     var fieldSubStruct = ParseStructOrUnion(fieldType, cppStruct, innerStructCount++);
-                    
+
                     // If fieldName is empty, then we need to inline fields from the struct/union.
                     if (string.IsNullOrEmpty(fieldName))
                     {
@@ -767,6 +799,10 @@ namespace SharpCastXml.Parser
                 return cppEnum;
 
             cppEnum = new CppEnum { Name = xElement.AttributeValue("name") };
+            AddExisting(cppEnum, xElement);
+
+            ParseContext(cppEnum, xElement);
+            ParseNested(cppEnum, xElement);
 
 
             // Doh! Anonymous Enum, need to handle them!
@@ -809,6 +845,7 @@ namespace SharpCastXml.Parser
             AddExisting(cppMarshallable, xElement);
             ResolveAndFillType(xElement.AttributeValue("type"), cppMarshallable);
 
+            ParseContext(cppMarshallable, xElement);
 
             var value = xElement.AttributeValue("init") ?? string.Empty;
             if (cppMarshallable.TypeName == "GUID")
@@ -954,6 +991,66 @@ namespace SharpCastXml.Parser
                     break;
             }
             return null;
+        }
+
+        private CppElement ParseNamespace(XElement xElement)
+        {
+            var cppNamespace = GetExisting<CppNamespace>(xElement);
+
+            if (cppNamespace != null)
+                return cppNamespace;
+
+            string name = xElement.AttributeValue("name");
+
+            // Return null for root namespace
+            if(name == "::")
+                return null;
+
+            cppNamespace = new CppNamespace { Name = xElement.AttributeValue("name") };
+            AddExisting(cppNamespace, xElement);
+
+            ParseContext(cppNamespace, xElement);
+            ParseNested(cppNamespace, xElement);
+
+            foreach (var xNamespaceElement in xElement.Elements())
+            {
+                var cppElement = ParseElement(xNamespaceElement);
+                if (cppElement != null)
+                    cppNamespace.Add(cppElement);
+            }
+
+            return cppNamespace;
+        }
+
+        private void ParseContext(IContextTrait elem, XElement xElement)
+        {
+            if (xElement.AttributeValue("context") == null) 
+                return;
+
+            var xContext = _mapIdToXElement[xElement.AttributeValue("context")];
+
+            if (xContext.Name.LocalName == CastXml.TagNamespace)
+            {
+                var cppNamespace = ParseNamespace(xContext);
+                elem.Context = cppNamespace;
+            }
+            else
+            {
+                var cppElement = ParseElement(xContext);
+                if (cppElement != null)
+                    elem.Context = cppElement;
+            }
+
+        }
+
+        private void ParseNested(CppElement elem, XElement xElement)
+        {
+            foreach(var xNested in xElement.Elements())
+            {
+                var cppElement = ParseElement(xNested);
+                if (cppElement != null)
+                    elem.Add(cppElement);
+            }
         }
 
         /// <summary>

@@ -17,6 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+using SharpCastXml.CppModel.Traits;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
@@ -26,7 +27,7 @@ namespace SharpCastXml.CppModel
     /// A C++ struct.
     /// </summary>
     [XmlType("struct")]
-    public class CppStruct : CppDatatype
+    public class CppStruct : CppDatatype, IContextTrait
     {
         /// <summary>
         /// Gets or sets the name of the parent.
@@ -47,5 +48,15 @@ namespace SharpCastXml.CppModel
 
         [XmlAttribute("union")]
         public bool IsUnion { get; set; }
+
+
+        /// <summary>
+        /// Gets or sets the context.
+        /// </summary>
+        /// <value>
+        /// The Context.
+        /// </value>
+        [XmlElement("context")]
+        public CppElement Context { get; set; }
     }
 }
