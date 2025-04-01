@@ -120,6 +120,11 @@ namespace SharpCastXml.Parser
         public const string TagBase = "Base";
 
         /// <summary>
+        /// GccXml tag for Unimplemented
+        /// </summary>
+        public const string TagUnimplemented = "Unimplemented";
+
+        /// <summary>
         /// Gets or sets the executable path of castxml.
         /// </summary>
         /// <value>The executable path.</value>
@@ -303,18 +308,22 @@ namespace SharpCastXml.Parser
             {
                 if (!Directory.Exists(dir))
                     return;
-                foreach (var file in Directory.GetFiles(dir)) {
+                foreach (var file in Directory.GetFiles(dir))
+                {
                     if (Path.GetFileNameWithoutExtension(file).ToLower() != "castxml")
                         continue;
 
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    {
                         if (Path.GetExtension(file).ToLower() == ".exe")
                             throw new CastXMLFound(Path.GetFullPath(file));
-                    } else {
+                    }
+                    else
+                    {
                         //var unixFileInfo = new Mono.Unix.UnixFileInfo(file);
                         //var executeFlags = unixFileInfo.FileAccessPermissions & (Mono.Unix.FileAccessPermissions.GroupExecute | Mono.Unix.FileAccessPermissions.UserExecute | Mono.Unix.FileAccessPermissions.OtherExecute);
                         //if ((int)(executeFlags) != 0)
-                            throw new CastXMLFound(Path.GetFullPath(file));
+                        throw new CastXMLFound(Path.GetFullPath(file));
                     }
                 }
             }

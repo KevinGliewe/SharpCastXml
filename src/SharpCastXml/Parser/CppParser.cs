@@ -521,7 +521,16 @@ namespace SharpCastXml.Parser
                 if (string.IsNullOrEmpty(xElementBaseId))
                     continue;
 
-                var xElementBase = _mapIdToXElement[xElementBaseId];
+                var baseSplit = xElementBaseId.Split(':');
+
+                var baseId = baseSplit[0];
+
+                if (baseSplit.Length > 1)
+                {
+                    baseId = baseSplit[1];
+                }
+
+                var xElementBase = _mapIdToXElement[baseId];
                 var baseTypeName = xElementBase.AttributeValue("name");
 
                 CppInterface cppInterfaceBase = null;
@@ -686,7 +695,7 @@ namespace SharpCastXml.Parser
             List<CppBase> baseElems = new List<CppBase>();
             foreach (var xElementBase in xElement.Elements())
             {
-                if(xElementBase.Name.LocalName != CastXml.TagBase)
+                if (xElementBase.Name.LocalName != CastXml.TagBase)
                     continue;
 
                 baseElems.Add(ParseBase(xElementBase));
@@ -769,7 +778,17 @@ namespace SharpCastXml.Parser
                 if (string.IsNullOrEmpty(xElementBaseId))
                     continue;
 
-                var xElementBase = _mapIdToXElement[xElementBaseId];
+                var baseSplit = xElementBaseId.Split(':');
+
+                var baseId = baseSplit[0];
+
+                if (baseSplit.Length > 1)
+                {
+                    baseId = baseSplit[1];
+                }
+
+
+                var xElementBase = _mapIdToXElement[baseId];
 
                 CppStruct cppStructBase = null;
                 Logger.RunInContext("Base", () => { cppStructBase = ParseStructOrUnion(xElementBase); });
@@ -1015,7 +1034,7 @@ namespace SharpCastXml.Parser
             string name = xElement.AttributeValue("name");
 
             // Return null for root namespace
-            if(name == "::")
+            if (name == "::")
                 return null;
 
             cppNamespace = new CppNamespace { Name = xElement.AttributeValue("name") };
@@ -1037,7 +1056,7 @@ namespace SharpCastXml.Parser
         private CppBase ParseBase(XElement xElement)
         {
 
-            CppBase cppBase = new CppBase {};
+            CppBase cppBase = new CppBase { };
 
             var _type = xElement.AttributeValue("type");
 
@@ -1058,7 +1077,7 @@ namespace SharpCastXml.Parser
 
         private void ParseContext(IContextTrait elem, XElement xElement)
         {
-            if (xElement.AttributeValue("context") == null) 
+            if (xElement.AttributeValue("context") == null)
                 return;
 
             var xContext = _mapIdToXElement[xElement.AttributeValue("context")];
@@ -1079,7 +1098,7 @@ namespace SharpCastXml.Parser
 
         private void ParseNested(CppElement elem, XElement xElement)
         {
-            foreach(var xNested in xElement.Elements())
+            foreach (var xNested in xElement.Elements())
             {
                 var cppElement = ParseElement(xNested);
                 if (cppElement != null)
@@ -1181,6 +1200,10 @@ namespace SharpCastXml.Parser
                         type.TypeName = "__function__stdcall";
                         isTypeResolved = true;
                         break;
+                    case CastXml.TagUnimplemented:
+                        isTypeResolved = true;
+                        type.Datatype = ParseUnimplemented(xType);
+                        break;
                     default:
                         throw new InvalidOperationException(string.Format(System.Globalization.CultureInfo.InvariantCulture, "Unexpected tag type [{0}]", xType.Name.LocalName));
                 }
@@ -1276,6 +1299,22 @@ namespace SharpCastXml.Parser
             cppFType.Align = xElement.AttributeInt("align");
 
             return cppFType;
+        }
+
+        private CppUnimplemented ParseUnimplemented(XElement xElement)
+        {
+            var cppUnimplemented = GetExisting<CppUnimplemented>(xElement);
+
+            if (cppUnimplemented != null)
+                return cppUnimplemented;
+
+            string kind = xElement.AttributeValue("kind");
+            string type_class = xElement.AttributeValue("type_class");
+
+            cppUnimplemented = new CppUnimplemented { Kind = kind, TypeClass = type_class };
+            AddExisting(cppUnimplemented, xElement);
+
+            return cppUnimplemented;
         }
 
 
