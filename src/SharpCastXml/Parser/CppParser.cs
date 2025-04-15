@@ -945,12 +945,20 @@ namespace SharpCastXml.Parser
         /// </summary>
         private void ParseAllElements()
         {
+            List<string> processList = _config.Process.Select(i => i.ToLower().Replace('\\', '/')).ToList();
+
             foreach (var includeGccXmlId in _mapFileToXElement.Keys)
             {
-                var includeId = GetIncludeIdFromFileId(includeGccXmlId);
+                string includeId = GetIncludeIdFromFileId(includeGccXmlId);
+
+                if (string.IsNullOrEmpty(includeId))
+                    continue;
+
+                // Make sure that the includeId is in the same format as the process list
+                includeId = includeId.ToLower().Replace('\\', '/');
 
                 // Process only files listed inside the config files
-                if (!_config.Process.Contains(includeId))
+                if (!processList.Contains(includeId))
                     continue;
 
                 // Log current include being processed
@@ -1162,8 +1170,12 @@ namespace SharpCastXml.Parser
                         type.Datatype = ParseFundamentalType(xType);
                         type.TypeName = type.Datatype.Name;
                         break;
-                    case CastXml.TagClass:
                     case CastXml.TagEnumeration:
+                        type.TypeName = name;
+                        isTypeResolved = true;
+                        // type.Datatype = ParseEnum(xType);
+                        break;
+                    case CastXml.TagClass:
                     case CastXml.TagStruct:
                     case CastXml.TagUnion:
                         type.TypeName = name;
