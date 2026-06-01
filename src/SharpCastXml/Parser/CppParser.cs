@@ -375,7 +375,7 @@ namespace SharpCastXml.Parser
 
             // Clang outputs attributes in reverse order
             // TODO: Check if applies to all declarations
-            foreach (var item in attributes.Split(' ').Reverse())
+            foreach (var item in attributes.Split(' ').AsEnumerable().Reverse())
             {
                 var newItem = item;
                 if (newItem.StartsWith(gccXmlAttribute))
@@ -1296,7 +1296,7 @@ namespace SharpCastXml.Parser
             if (longCount == 1 && outputType == "double")
                 outputType = "long double";     // 96 bytes, unhandled
             if (longCount == 2)
-                outputType = "longlong";
+                outputType = "long long";
             if (shortCount == 1)
                 outputType = "short";
             if (isUnsigned)
