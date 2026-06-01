@@ -220,7 +220,7 @@ namespace SharpCastXml.CppModel
                 return;
             }
 
-            Attributes = attributes.Split(' ').Reverse().ToArray();
+            Attributes = attributes.Split(' ').AsEnumerable().Reverse().ToArray();
             
             
 
